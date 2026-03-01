@@ -33,49 +33,47 @@
     </div>
 
     <script type="module">
-    
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+        // Importamos Firebase y Firestore correctamente
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyDMHih5DwWZb0xcUUNwoINw8403Dvz_05U",
-    authDomain: "perfiles-24555.firebaseapp.com",
-    projectId: "perfiles-24555",
-    storageBucket: "perfiles-24555.firebasestorage.app",
-    messagingSenderId: "603890826240",
-    appId: "1:603890826240:web:7b290eefc8eaaf3da12ce5",
-    measurementId: "G-51NKVSYRLT"
-  };
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMHih5DwWZb0xcUUNwoINw8403Dvz_05U",
+            authDomain: "perfiles-24555.firebaseapp.com",
+            projectId: "perfiles-24555",
+            storageBucket: "perfiles-24555.firebasestorage.app",
+            messagingSenderId: "603890826240",
+            appId: "1:603890826240:web:7b290eefc8eaaf3da12ce5",
+            measurementId: "G-51NKVSYRLT"
+        };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
-
+        // Inicializamos Firebase y la base de datos
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Función para guardar
+        // Hacemos que la función sea global para que el botón la encuentre
         window.guardarDatos = async () => {
             const nom = document.getElementById('nombre').value;
             const tel = document.getElementById('telefono').value;
-            // Usamos un ID fijo por ahora para la prueba
-            await setDoc(doc(db, "usuarios", "perfil_actual"), {
-                nombre: nom,
-                telefono: tel
-            });
-            alert("¡Datos guardados!");
-            location.reload();
+            
+            try {
+                await setDoc(doc(db, "usuarios", "perfil_actual"), {
+                    nombre: nom,
+                    telefono: tel
+                });
+                alert("¡Datos guardados con éxito!");
+                location.reload();
+            } catch (e) {
+                console.error("Error al guardar: ", e);
+                alert("Hubo un error al guardar. Revisa las reglas de Firestore.");
+            }
         };
 
-        // Función para cargar al abrir la página
+        // Cargamos los datos cuando se abre la página
         window.onload = async () => {
-            const docSnap = await getDoc(doc(db, "usuarios", "perfil_actual"));
+            const docRef = doc(db, "usuarios", "perfil_actual");
+            const docSnap = await getDoc(docRef);
+
             if (docSnap.exists()) {
                 document.getElementById('mostrarNombre').innerText = "Nombre: " + docSnap.data().nombre;
                 document.getElementById('mostrarTel').innerText = "Tel: " + docSnap.data().telefono;

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil de Usuario</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #E3F2FD; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .contenedor { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+        h1 { color: #1565C0; margin-bottom: 10px; }
+        p { color: #666; line-height: 1.6; }
+        .status { display: inline-block; background: #4CAF50; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Mi Perfil Web</h1>
+        <p>Esta página está conectada con mi aplicación móvil de perfiles.</p>
+        <div class="status">Conectado con Firebase</div>
+    </div>
+</body>
+</html>

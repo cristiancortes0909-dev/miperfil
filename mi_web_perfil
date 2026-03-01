@@ -3,20 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfil de Usuario</title>
+    <title>Mi Perfil Pro</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #E3F2FD; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .contenedor { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
-        h1 { color: #1565C0; margin-bottom: 10px; }
-        p { color: #666; line-height: 1.6; }
-        .status { display: inline-block; background: #4CAF50; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em; margin-top: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #E3F2FD; display: flex; justify-content: center; padding: 20px; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: #1565C0; }
+        input, textarea { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+        button { background: #1565C0; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0D47A1; }
+        .info-actual { margin-top: 20px; padding: 15px; background: #F5F5F5; border-radius: 10px; text-align: left; }
     </style>
 </head>
 <body>
-    <div class="contenedor">
-        <h1>Mi Perfil Web</h1>
-        <p>Esta página está conectada con mi aplicación móvil de perfiles.</p>
-        <div class="status">Conectado con Firebase</div>
+    <div class="card">
+        <h1>Mi Perfil Personal</h1>
+        <p>Edita tu información aquí:</p>
+        
+        <input type="text" id="nombre" placeholder="Tu Nombre Real">
+        <input type="text" id="telefono" placeholder="Tu Teléfono">
+        <textarea id="bio" placeholder="Cuéntanos sobre ti..."></textarea>
+        
+        <button onclick="guardarDatos()">GUARDAR CAMBIOS</button>
+
+        <div class="info-actual">
+            <strong>Datos Guardados:</strong>
+            <p id="mostrarNombre">Nombre: ---</p>
+            <p id="mostrarTel">Tel: ---</p>
+        </div>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            // COPIA ESTO DE TU CONSOLA DE FIREBASE (Configuración del proyecto)
+            apiKey: "TU_API_KEY",
+            authDomain: "perfiles-XXXX.firebaseapp.com",
+            projectId: "perfiles-XXXX",
+            storageBucket: "perfiles-XXXX.appspot.com",
+            messagingSenderId: "XXXX",
+            appId: "XXXX"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Función para guardar
+        window.guardarDatos = async () => {
+            const nom = document.getElementById('nombre').value;
+            const tel = document.getElementById('telefono').value;
+            // Usamos un ID fijo por ahora para la prueba
+            await setDoc(doc(db, "usuarios", "perfil_actual"), {
+                nombre: nom,
+                telefono: tel
+            });
+            alert("¡Datos guardados!");
+            location.reload();
+        };
+
+        // Función para cargar al abrir la página
+        window.onload = async () => {
+            const docSnap = await getDoc(doc(db, "usuarios", "perfil_actual"));
+            if (docSnap.exists()) {
+                document.getElementById('mostrarNombre').innerText = "Nombre: " + docSnap.data().nombre;
+                document.getElementById('mostrarTel').innerText = "Tel: " + docSnap.data().telefono;
+            }
+        };
+    </script>
 </body>
 </html>

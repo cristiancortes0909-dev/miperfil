@@ -17,7 +17,7 @@
 <body>
     <div class="card">
         <h1>Mi Perfil Personal</h1>
-        <p id="userEmail" style="color: #666; font-size: 0.9em;">Cargando usuario...</p>
+        <p id="userEmail" style="color: #666; font-size: 0.9em;">Identificando usuario...</p>
         
         <input type="text" id="nombre" placeholder="Tu Nombre Real">
         <input type="text" id="telefono" placeholder="Tu Teléfono">
@@ -35,7 +35,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDMHih5DwWZb0xcUUNwoINw8403Dvz_05U",
@@ -48,32 +47,37 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
 
-        let uidActual = null;
+        // --- LÓGICA PARA LEER EL CORREO DEL LINK ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const emailUsuario = urlParams.get('email'); // Extrae el correo de ?email=...
 
-        // Detectar automáticamente quién inició sesión en la App
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                uidActual = user.uid; // Guardamos el ID único del usuario
-                document.getElementById('userEmail').innerText = "Sesión: " + user.email;
-                
-                // Cargar solo los datos de ESTE usuario
-                const docRef = doc(db, "usuarios", uidActual);
+        if (emailUsuario) {
+            document.getElementById('userEmail').innerText = "Usuario: " + emailUsuario;
+            cargarDatosExistentes(emailUsuario);
+        } else {
+            document.getElementById('userEmail').innerText = "Acceso no identificado";
+            alert("Para ver tus datos, entra desde el botón de la App.");
+        }
+
+        // Función para cargar datos al abrir la página
+        async function cargarDatosExistentes(email) {
+            try {
+                const docRef = doc(db, "usuarios", email);
                 const docSnap = await getDoc(docRef);
                 if (docSnap.exists()) {
                     document.getElementById('mostrarNombre').innerText = "Nombre: " + docSnap.data().nombre;
                     document.getElementById('mostrarTel').innerText = "Tel: " + docSnap.data().telefono;
                 }
-            } else {
-                document.getElementById('userEmail').innerText = "No has iniciado sesión";
-                alert("Por seguridad, abre esta página desde la App.");
+            } catch (e) {
+                console.error("Error al cargar:", e);
             }
-        });
+        }
 
+        // Función para guardar (ahora usando el email como ID de documento)
         window.guardarDatos = async () => {
-            if (!uidActual) {
-                alert("No hay un usuario identificado.");
+            if (!emailUsuario) {
+                alert("Error: No se detectó el usuario de la App.");
                 return;
             }
 
@@ -81,17 +85,17 @@
             const tel = document.getElementById('telefono').value;
             
             try {
-                // GUARDAR usando el UID como nombre del documento
-                await setDoc(doc(db, "usuarios", uidActual), {
+                // Guardamos en una colección llamada 'usuarios' usando el EMAIL como nombre de archivo
+                await setDoc(doc(db, "usuarios", emailUsuario), {
                     nombre: nom,
                     telefono: tel,
-                    email: auth.currentUser.email
+                    lastUpdate: new Date()
                 });
-                alert("¡Tus datos privados han sido guardados!");
-                location.reload();
+                alert("¡Datos guardados para " + emailUsuario + "!");
+                location.reload(); // Recarga para ver los cambios reflejados
             } catch (e) {
                 console.error(e);
-                alert("Error de permisos. Revisa las reglas de Firestore.");
+                alert("Error al guardar. Verifica las reglas de Firestore.");
             }
         };
     </script>
